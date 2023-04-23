@@ -11,6 +11,8 @@
 # sec11 Registro de usuario con flask_login y flask_wtf
 # sec12 Login de usuario con flask_login y flask_wtf
 # sec13 Logout de usuario con flask_login
+# sec14 Bloquear endpoint para usuarios no registrados
+# sec15 Personalizando y protegiendo el admin con flask_login
 
 
 from flask import Flask, render_template ## sec 1
@@ -20,6 +22,7 @@ from flask import flash ## sec 6
 
 from flask_admin import Admin ## sec10
 from flask_admin.contrib.sqlamodel import ModelView ## sec10
+from flask_admin import AdminIndexView ## sec15
 from flask_login import LoginManager, login_user, current_user, UserMixin ## sec11
 from flask_login import logout_user ## sec13
 from flask_login import login_required ## sec14
@@ -37,7 +40,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False ## sec 2 / Si no ponemos es
 
 # Configuraciones
 db = SQLAlchemy(app) ## sec 2
-admin = Admin(app) ## sec10
+# admin = Admin(app) ## sec10
 login_manager = LoginManager(app) ## sec11
 
 class Data(db.Model): ## sec 3
@@ -66,14 +69,46 @@ class User(db.Model, UserMixin):                                  #
     def check_password(self, password):                           #
         return check_password_hash(self.password,password)        # Hasta aqu'i
 
+# #sec15 Para proteger una vista espec'ifica en el admin, Por ejemplo en este caso la
+# tabla Data creamos una clase de ModelView para sobreescirbir el m'etodo is_accessible().
+class MyModelView(ModelView): ## sec15
+    # Con esto la tabla Data se muestra en el Admin solo si el usuario est'a autenticado.
+    def is_accessible(self): ## sec15
+        return current_user.is_authenticated # type: ignore ## sec15
+    
+    # funci'on que se ejecuta cuando se da el error por necesitar estar el usuario autenticado
+    def inaccessible_callback(self, name, **kwargs): ## sec15
+        flash('Debe estar autenticado', 'error') ## sec15
+        return redirect(url_for('index')) ## sec15
+    
 
-admin.add_view(ModelView(Data, db.session)) ## sec10
+# #sec15 Para proteger la vista Home en el admin
+# creamos una clase de AdminIndexView para sobreescirbir el m'etodo is_accessible().
+class MyAdminIndexView(AdminIndexView): ## sec15
+    # Con esto se muestra el Home en el Admin solo si el usuario est'a autenticado.
+    def is_accessible(self): ## sec15
+        return current_user.is_authenticated # type: ignore ## sec15
+    
+    # funci'on que se ejecuta cuando se da el error por necesitar estar el usuario autenticado
+    def inaccessible_callback(self, name, **kwargs): ## sec15
+        flash('Debe estar autenticado', 'error') ## sec15
+        return redirect(url_for('index')) ## sec15
+
+admin = Admin(app , index_view=MyAdminIndexView()) ## sec15
+# admin.add_view(ModelView(Data, db.session)) ## sec10
+admin.add_view(MyModelView(Data, db.session)) ## sec15
 admin.add_view(ModelView(User, db.session,name='Usuarios',)) ## sec11
 
 # Este decorador es obligatorio para que flask_login cargue el ususario
 @login_manager.user_loader ## sec11
 def user_loader(user_id): ## sec11
     return User.query.get(user_id) ## sec11
+
+# Este decorador dispara la funci'on cuando se da el error por necesitar estar el usuario autenticado
+@login_manager.unauthorized_handler ## sec14
+def unauthorized(): ## sec14
+    flash('Debe estar autenticado', 'error') ## sec14
+    return redirect(url_for('index')) ## sec14
 
 
 @app.route('/') ## sec 1
@@ -157,7 +192,7 @@ def update(): ## sec 8
     
 
 @app.route('/delete/<id>/', methods= ['GET','POST']) ## sec 9
-@login_required
+@login_required ## sec14
 def delete(id): ## sec 9
     my_data = Data.query.get(id) ## sec 9
     db.session.delete(my_data) ## sec 9
