@@ -12,7 +12,9 @@
 # sec12 Login de usuario con flask_login y flask_wtf
 # sec13 Logout de usuario con flask_login
 # sec14 Bloquear endpoint para usuarios no registrados
-# sec15 Personalizando y protegiendo el admin con flask_login
+# sec15 Protegiendo el admin con flask_login
+# sec16 Agregando contenido al Home del Admin
+# sec17 Agregando una nueva vista al Admin
 
 
 from flask import Flask, render_template ## sec 1
@@ -21,6 +23,7 @@ from flask import request, redirect, url_for ## sec 5
 from flask import flash ## sec 6
 
 from flask_admin import Admin ## sec10
+from flask_admin import BaseView, expose ## sec17
 from flask_admin.contrib.sqlamodel import ModelView ## sec10
 from flask_admin import AdminIndexView ## sec15
 from flask_login import LoginManager, login_user, current_user, UserMixin ## sec11
@@ -93,9 +96,16 @@ class MyAdminIndexView(AdminIndexView): ## sec15
     def inaccessible_callback(self, name, **kwargs): ## sec15
         flash('Debe estar autenticado', 'error') ## sec15
         return redirect(url_for('index')) ## sec15
+    
 
-admin = Admin(app , index_view=MyAdminIndexView()) ## sec15
+class MyNewView(BaseView): ## sec17
+    @expose('/') ## sec17
+    def index(self): ## sec17
+        return self.render('admin/mynewview.html') ## sec17
+
+admin = Admin(app , index_view=MyAdminIndexView(), name='MyApp') ## sec15 Crear despues de la clase MyAdminIndexView
 # admin.add_view(ModelView(Data, db.session)) ## sec10
+admin.add_view(MyNewView(name='My view', endpoint='newview')) ## sec17
 admin.add_view(MyModelView(Data, db.session)) ## sec15
 admin.add_view(ModelView(User, db.session,name='Usuarios',)) ## sec11
 
@@ -257,13 +267,24 @@ def login():                                                                #
 
     return render_template('login.html', **context)                         # Hasta aqu'i la sec12
 
-## Todo este modelos es de ## sec13 #########################################
+## Todo este código es de ## sec13 #########################################
 @app.route('/logout', methods = ['GET'])                                    #
 def logout():                                                               #
     logout_user()                                                           #
     flash('Sesión cerrada satisfactoriamente')
 
     return redirect(url_for('index'))                                       # Hasta aqu'i la sec13
+
+#################### sec16 #############################
+# Se debe crear una carpeta con el nombre admin dentro templates
+# y dentro el archivo index.html que sobre escribe el original
+# Se extiende master.html y se pone contenido dentro del bloque body
+# 
+# {% extends 'admin/master.html' %}
+# 
+# {% block body %}
+#   <h1>Hello world</h1>
+# {% endblock %}
 
 if __name__ == "__main__": ## sec 1
     app.run(debug= True) ## sec 1
