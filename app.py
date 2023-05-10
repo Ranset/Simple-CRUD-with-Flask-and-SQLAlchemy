@@ -1,7 +1,7 @@
-# sec 1 Creaci'on de la aplicaci'on
+# sec 1 Creación de la aplicación
 # sec 2 Importando y configurando el ORM
-# sec 3 Creaci'on de los modelos
-# sec 4 Creaci'on de las tablas mediante python
+# sec 3 Creación de los modelos
+# sec 4 Creación de las tablas mediante python
 # sec 5 Insertando datos
 # sec 6 Mensajes Flash
 # sec 7 Obteniendo los datos
@@ -70,16 +70,16 @@ class User(db.Model, UserMixin):                                  #
     name = db.Column(db.String(100))                              #
 
     def check_password(self, password):                           #
-        return check_password_hash(self.password,password)        # Hasta aqu'i
+        return check_password_hash(self.password,password)        # Hasta aquí
 
 # #sec15 Para proteger una vista espec'ifica en el admin, Por ejemplo en este caso la
 # tabla Data creamos una clase de ModelView para sobreescirbir el m'etodo is_accessible().
 class MyModelView(ModelView): ## sec15
-    # Con esto la tabla Data se muestra en el Admin solo si el usuario est'a autenticado.
+    # Con esto la tabla Data se muestra en el Admin solo si el usuario está autenticado.
     def is_accessible(self): ## sec15
         return current_user.is_authenticated # type: ignore ## sec15
     
-    # funci'on que se ejecuta cuando se da el error por necesitar estar el usuario autenticado
+    # función que se ejecuta cuando se da el error por necesitar estar el usuario autenticado
     def inaccessible_callback(self, name, **kwargs): ## sec15
         flash('Debe estar autenticado', 'error') ## sec15
         return redirect(url_for('index')) ## sec15
@@ -88,11 +88,11 @@ class MyModelView(ModelView): ## sec15
 # #sec15 Para proteger la vista Home en el admin
 # creamos una clase de AdminIndexView para sobreescirbir el m'etodo is_accessible().
 class MyAdminIndexView(AdminIndexView): ## sec15
-    # Con esto se muestra el Home en el Admin solo si el usuario est'a autenticado.
+    # Con esto se muestra el Home en el Admin solo si el usuario está autenticado.
     def is_accessible(self): ## sec15
         return current_user.is_authenticated # type: ignore ## sec15
     
-    # funci'on que se ejecuta cuando se da el error por necesitar estar el usuario autenticado
+    # función que se ejecuta cuando se da el error por necesitar estar el usuario autenticado
     def inaccessible_callback(self, name, **kwargs): ## sec15
         flash('Debe estar autenticado', 'error') ## sec15
         return redirect(url_for('index')) ## sec15
@@ -103,7 +103,7 @@ class MyNewView(BaseView): ## sec17
     def index(self): ## sec17
         return self.render('admin/mynewview.html') ## sec17
 
-admin = Admin(app , index_view=MyAdminIndexView(), name='MyApp') ## sec15 Crear despues de la clase MyAdminIndexView
+admin = Admin(app , index_view=MyAdminIndexView(), name='MyApp') ## sec15 Crear después de la clase MyAdminIndexView
 # admin.add_view(ModelView(Data, db.session)) ## sec10
 admin.add_view(MyNewView(name='My view', endpoint='newview')) ## sec17
 admin.add_view(MyModelView(Data, db.session)) ## sec15
@@ -114,7 +114,7 @@ admin.add_view(ModelView(User, db.session,name='Usuarios',)) ## sec11
 def user_loader(user_id): ## sec11
     return User.query.get(user_id) ## sec11
 
-# Este decorador dispara la funci'on cuando se da el error por necesitar estar el usuario autenticado
+# Este decorador dispara la función cuando se da el error por necesitar estar el usuario autenticado
 @login_manager.unauthorized_handler ## sec14
 def unauthorized(): ## sec14
     flash('Debe estar autenticado', 'error') ## sec14
@@ -186,15 +186,15 @@ def update(): ## sec 8
         # La ventana modal debe estar dentro del loop del for de la tabla
         # para poder usar las variables de cada registro.
         # Al id de la ventana se le debe incluir el id del registro,
-        # Y as'i crear un formulario por cada registro. Ej:
+        # Y así crear un formulario por cada registro. Ej:
         # <div id="modaledit{{row.id}}" class="modal fade" role="dialog">
         # 
-        # En el bot'on que abre la ventana de actualizaci'on:
+        # En el botón que abre la ventana de actualización:
         # Agregar al par'ametro data-target el id del registro
         # 
         # data-target="#modaledit{{row.id}}"
         # 
-        # En el action del formulario poner el endpoint que ejecuta la actualizaci'on
+        # En el action del formulario poner el endpoint que ejecuta la actualización
         # Ej:
         # <form action="{{ url_for('update' ) }}" method="post">
 
@@ -210,7 +210,7 @@ def delete(id): ## sec 9
 
     flash('Employee deleted successfully') ## sec 9
 
-    # Poner en el href del bot'on la direcci'o'n de este endpoint con el id del registro
+    # Poner en el href del botón la direcció'n de este endpoint con el id del registro
     # href="/delete/{{row.id}}"
 
     return redirect(url_for('index')) ## sec 9
@@ -244,7 +244,7 @@ def register():                                                             #
         "form": form                                                        #
     }                                                                       #
 
-    return render_template('register.html', **context)                      # Hasta aqu'i la sec11
+    return render_template('register.html', **context)                      # Hasta aquí la sec11
 
 ## Todo este modelos es de ## sec12 #########################################
 @app.route('/login', methods = ['GET', 'POST'])                             #
@@ -265,7 +265,7 @@ def login():                                                                #
         "form": form                                                        #
     }                                                                       #
 
-    return render_template('login.html', **context)                         # Hasta aqu'i la sec12
+    return render_template('login.html', **context)                         # Hasta aquí la sec12
 
 ## Todo este código es de ## sec13 #########################################
 @app.route('/logout', methods = ['GET'])                                    #
@@ -273,7 +273,7 @@ def logout():                                                               #
     logout_user()                                                           #
     flash('Sesión cerrada satisfactoriamente')
 
-    return redirect(url_for('index'))                                       # Hasta aqu'i la sec13
+    return redirect(url_for('index'))                                       # Hasta aquí la sec13
 
 #################### sec16 #############################
 # Se debe crear una carpeta con el nombre admin dentro templates
